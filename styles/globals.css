@@ -15,12 +15,19 @@ a {
   box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
-  body {
-    color: white;
-    background: black;
-  }
+.btn-primary {
+  background-color: #0070f3;
+  color: #fff;
+  border: 1px solid #0070f3;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease 0s;
+}
+
+.btn-primary:hover {
+  background-color: #0061d5;
+  border-color: #0061d5;
 }
