@@ -1,9 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 // FIREBASE
-import { auth, firestore } from "../firebase";
+import { auth, firestore } from '../util/firebase';
+// CONTEXT
+import { useContext } from "react";
+import { AuthContext } from "../util/context";
 
 export const useSignUpWithEmail = () => {
-    const [user, setUser] = useState(null);
+    // STATE & VARIABLES
+    const { dispatch } = useContext(AuthContext);
     const [error, setError] = useState(null);
     const [isPending, setIsPending] = useState(false);
 
@@ -17,13 +21,28 @@ export const useSignUpWithEmail = () => {
                 throw new Error("Something went wrong");
             }
 
+            // Update the user's profile
             await response.user.updateProfile({ displayName });
-            setUser(response.user);
+
+            // Add user to 'users' & 'usernames' collections
+            const userDoc = firestore.collection("users").doc(response.user.uid);
+            const usernameDoc = firestore.collection("usernames").doc(displayName);
+            const batch = firestore.batch();
+            batch.set(userDoc, { displayName });
+            batch.set(usernameDoc, { uid: response.user.uid });
+            await batch.commit();
+
+            // finally save the user in the context
+            dispatch({ type: 'SIGNUP', payload: response.user });
         } catch(err) {
             setError(err.message);
+            dispatch({ type: 'SIGNUP_ERROR', payload: err.message });
         } finally {
             setIsPending(false);
         }
     }
+
+
+    return { error, isPending, signUp };
 
 }

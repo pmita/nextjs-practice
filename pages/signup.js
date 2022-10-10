@@ -1,22 +1,32 @@
 import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import debounce from "lodash.debounce";
 // FIREBASE
 import { firestore } from "../util/firebase";
+// HOOKS
+import { useSignUpWithEmail } from "../hooks/useSignUpWithEmail";
 // STYLES
 import styles from "../styles/SignUp.module.scss";
 
 export default function SignUpPage() {
     // STATE & VARIABLES
-    const { register, handleSubmit, formState: { errors, isValid, isDirty }, reset, getValues } = useForm( { mode: "onChange" } );
+    const router = useRouter();
+    const { 
+        register, handleSubmit, formState: { errors }, reset, getValues, watch
+    } = useForm( { mode: "onChange" } );
     const { username } = getValues();
+    const watchUsername = watch("username");
     const [usernameExists, setUsernameExists] = useState(false);
     const [usernamePending, setUsernamePending] = useState(false);
     const [usernameError, setUsernameError] = useState(null);
+    const { error, isPending, signUp } = useSignUpWithEmail();
 
     // EVENTS
     const onSubmit = async ({ email, password, username }) => {
-        
+        signUp(email, password, username);
+        reset();
+        router.push('/');
     }
 
     // FUNCTIONS
@@ -92,7 +102,7 @@ export default function SignUpPage() {
                     {errors.username && <p>{errors.username.message}</p>}
                 </label>
                 {UsernameMessage()}
-                <button className="btn-primary" type="submit" disabled={!isDirty || !isValid}>Sign Up</button>
+                <button className="btn-primary" type="submit">Sign Up</button>
             </form>
         </main>
     )
